@@ -24,6 +24,9 @@ Password password = Password("4311"); //PassLib define password
 //create var for how long red LED blinks for
 unsigned int bruteDelay = 1000;
 
+//button pressed boolean
+bool pressed = false;
+
 //SETUP
 void setup() {
   //LEDs
@@ -35,6 +38,8 @@ void setup() {
   pinMode(but2, INPUT);
   pinMode(but3, INPUT);
   pinMode(but4, INPUT);
+  //MOTOR
+  pinMode(motor, OUTPUT);
 
   //enable serial monitor
   while (!Serial); //enable Serial Monitor for debugging
@@ -61,32 +66,56 @@ void loop() {
 }
 
 void buttonPress() {
-  if (digitalRead(but1) == LOW) {
+  if (digitalRead(but1) == HIGH) {
+    //ignore read if buttons is held
+    if(pressed) return;
+    
     //enter #1 into pin code
     password.append('1');
 
     //print #1 into serial monitor
     Serial.println("1");
-  } else if (digitalRead(but2) == LOW) {
+
+    currentLength = currentLength + 1;
+    pressed = !pressed;
+  } else if (digitalRead(but2) == HIGH) {
+    //ignore read if buttons is held
+    if(pressed) return;
+    
     //enter #2 into pin code
     password.append('2');
 
     //print #1 into serial monitor
     Serial.println("2");
-  } else if (digitalRead(but3) == LOW) {
+
+    currentLength = currentLength + 1;
+    pressed = !pressed;
+  } else if (digitalRead(but3) == HIGH) {
+    //ignore read if buttons is held
+    if(pressed) return;
+    
     //enter #3 into pin code
     password.append('3');
     
     //print #1 into serial monitor
     Serial.println("3");
-  } else if (digitalRead(but4) == LOW) {
+
+    currentLength = currentLength + 1;
+    pressed = !pressed;
+  } else if (digitalRead(but4) == HIGH) {
+    //ignore read if buttons is held
+    if(pressed) return;
+    
     //enter #4 into pin code
     password.append('4');
     
     //print #1 into serial monitor
     Serial.println("4");
+
+    currentLength = currentLength + 1;
+    pressed = !pressed;
   } else {
-    
+    pressed = false;
   }
   //end of buttonPress...
 }
@@ -105,7 +134,9 @@ void passCheck() {
   } else {
     //turns blue LED on when password length isn't 4
     digitalWrite(blueLED, HIGH);
-    //stops motor from spinning
+    //stops motor and LEDs from spinning and turning on
+    digitalWrite(redLED, LOW);
+    digitalWrite(greenLED, LOW);
     digitalWrite(motor, LOW);
   }
   
@@ -123,6 +154,9 @@ void passCorrect() {
   //spins motor
   digitalWrite(motor, HIGH);
 
+  //do everything here for 3 secs
+  delay(2000);
+
   //resets brute force delay timer to one second
   bruteDelay = 1000;
 
@@ -139,6 +173,9 @@ void passWrong() {
 
   //prints to serial monitor
   Serial.println("Password Incorrect");
+  Serial.print("(Attempts Wrong: ");
+  Serial.print(bruteDelay / 1000);
+  Serial.print(")");
 
   //turns off blue LED
   digitalWrite(blueLED, LOW);
